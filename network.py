@@ -24,7 +24,8 @@ def blaze_stem(filters):
 
 
 def blaze_net(input_shape):
-    blaze_layers = [
+    # Stacking layers for 16x16 feature maps.
+    blaze_layers_16x16 = [
         blaze_stem(24),
         blaze_block(24),
         blaze_block(24),
@@ -33,16 +34,47 @@ def blaze_net(input_shape):
         blaze_block(48),
         double_blaze_block(24, 96, (2, 2)),
         double_blaze_block(24, 96),
-        double_blaze_block(24, 96),
-        double_blaze_block(24, 96, (2, 2)),
-        double_blaze_block(23, 96),
         double_blaze_block(24, 96)]
 
+    # Stacking layers for 8x8 feature maps.
+    blaze_layers_8x8 = [
+        double_blaze_block(24, 96, (2, 2)),
+        double_blaze_block(24, 96),
+        double_blaze_block(24, 96)]
+
+    # Inputs defined here.
     inputs = keras.Input((input_shape), dtype=tf.float32)
+
+    # Forward propgation till feature map 16x16 got.
     x = inputs
-    for layer in blaze_layers:
+    for layer in blaze_layers_16x16:
         x = layer(x)
-    model = keras.Model(inputs=inputs, outputs=x, name='blaze_net')
+    x_16 = x
+
+    # Keep moving forward till feature map 8x8 got.
+    for layer in blaze_layers_8x8:
+        x = layer(x)
+    x_8 = x
+
+    # Get the classification and box from 16x16 feature map.
+    classes_16 = keras.layers.Conv2D(2, (1, 1))(x_16)
+    classes_16 = keras.layers.Flatten()(classes_16)
+    boxes_16 = keras.layers.Conv2D(4*2, (1, 1))(x_16)
+    boxes_16 = keras.layers.Flatten()(boxes_16)
+
+    # Get the classification and box from 8x8 feature map.
+    classes_8 = keras.layers.Conv2D(6, (1, 1))(x_8)
+    classes_8 = keras.layers.Flatten()(classes_8)
+    boxes_8 = keras.layers.Conv2D(4*6, (1, 1))(x_8)
+    boxes_8 = keras.layers.Flatten()(boxes_8)
+
+    # Assemble the results.
+    classifications = keras.layers.Concatenate()([classes_16, classes_8])
+    boxes = keras.layers.Concatenate()([boxes_16, boxes_8])
+
+    # Finally, build the model.
+    model = keras.Model(inputs=inputs,
+                        outputs=[classifications, boxes], name='blaze_net')
 
     return model
 
