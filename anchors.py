@@ -14,6 +14,6 @@ class Boxes(object):
         if boxes != []:
             self.boxes = np.array(boxes, dtype=np.float32)
             if self.boxes.ndim == 1:
-                self.boxes = np.expand_dims(self.boxes)
+                self.boxes = np.expand_dims(self.boxes, axis=0)
         else:
             self.boxes = None
