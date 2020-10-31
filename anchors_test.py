@@ -22,6 +22,11 @@ class TestBoxesFunctions(unittest.TestCase):
         self.assertTrue(
             np.allclose(b, np.array(self.boxes_1, dtype=np.float32)))
 
+    def test_boxes_areas(self):
+        areas = anchors.Boxes(self.boxes_1).areas()
+        self.assertTrue(
+            np.allclose(areas, np.array([4, 1], dtype=np.float32)))
+
 
 if __name__ == '__main__':
     unittest.main()

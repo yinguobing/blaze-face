@@ -17,3 +17,15 @@ class Boxes(object):
                 self.boxes = np.expand_dims(self.boxes, axis=0)
         else:
             self.boxes = None
+
+    def areas(self):
+        """Return the areas of the boxes.
+
+        Returns:
+            areas of the boxes.
+        """
+        heights = self.boxes[:, 1] - self.boxes[:, 0]
+        widths = self.boxes[:, 3] - self.boxes[:, 2]
+        areas = np.multiply(heights, widths)
+
+        return areas
