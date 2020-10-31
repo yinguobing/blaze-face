@@ -29,3 +29,24 @@ class Boxes(object):
         areas = np.multiply(heights, widths)
 
         return areas
+
+    def intersection(self, boxes):
+        """Return the intersection areas with other boxes.
+
+        Args:
+            boxes: the boxes to intersect with.
+
+        Returns:
+            intersection_areas.
+        """
+        max_y_min = np.maximum(self.boxes[:, 0], boxes.boxes[:, 0].transpose())
+        min_y_max = np.minimum(self.boxes[:, 1], boxes.boxes[:, 1].transpose())
+        heights = np.maximum(0, min_y_max - max_y_min)
+
+        max_x_min = np.maximum(self.boxes[:, 2], boxes.boxes[:, 2].transpose())
+        min_x_max = np.minimum(self.boxes[:, 3], boxes.boxes[:, 3].transpose())
+        widths = np.maximum(0, min_x_max - max_x_min)
+
+        areas = np.multiply(widths, heights)
+
+        return areas
