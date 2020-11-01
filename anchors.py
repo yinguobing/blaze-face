@@ -50,3 +50,21 @@ class Boxes(object):
         areas = np.multiply(widths, heights)
 
         return areas
+
+    def iou(self, boxes):
+        """Return the intersection over union with other boxes.
+
+        Args:
+            boxes: the input boxes.
+
+        Returns:
+            IoU values.
+        """
+        intersecion = self.intersection(boxes)
+        areas_self = self.areas()
+        areas_input = boxes.areas().transpose()
+        union = np.add(areas_self, areas_input) - intersecion
+
+        iou = np.divide(intersecion, union)
+
+        return iou

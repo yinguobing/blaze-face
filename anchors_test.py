@@ -34,6 +34,20 @@ class TestBoxesFunctions(unittest.TestCase):
         self.assertTrue(
             np.allclose(areas, np.array([[1, 0]], dtype=np.float32)))
 
+    def test_iou_no_intersection(self):
+        a = anchors.Boxes(self.boxes_1)
+        b = anchors.Boxes(self.boxes_2)
+        areas = a.iou(b)
+        self.assertTrue(
+            np.allclose(areas, np.array([[0, 0]], dtype=np.float32)))
+
+    def test_iou_intersection(self):
+        a = anchors.Boxes(self.boxes_1)
+        b = anchors.Boxes([2, 8, 2, 8])
+        areas = a.iou(b)
+        self.assertTrue(
+            np.allclose(areas, np.array([[1/(4+36-1), 1/36]], dtype=np.float32)))
+
 
 if __name__ == '__main__':
     unittest.main()
