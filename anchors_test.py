@@ -48,6 +48,10 @@ class TestBoxesFunctions(unittest.TestCase):
         self.assertTrue(
             np.allclose(areas, np.array([[1/(4+36-1), 1/36]], dtype=np.float32)))
 
+    def test_anchors_init(self):
+        a = anchors.Anchors([0.5, 0.1], [1], (16, 16), (128, 128))
+        self.assertTupleEqual(a.array.shape, (512, 4))
+
 
 if __name__ == '__main__':
     unittest.main()
