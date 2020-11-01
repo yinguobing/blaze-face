@@ -13,12 +13,12 @@ class TestBoxesFunctions(unittest.TestCase):
         self.boxes_2 = [[2, 5, 3, 4]]
 
     def test_init_with_one_box(self):
-        b = anchors.Boxes(self.boxes_0).boxes
+        b = anchors.Boxes(self.boxes_0).array
         self.assertTrue(
             np.allclose(b, np.array(self.boxes_0, dtype=np.float32)))
 
     def test_init_with_multiple_box(self):
-        b = anchors.Boxes(self.boxes_1).boxes
+        b = anchors.Boxes(self.boxes_1).array
         self.assertTrue(
             np.allclose(b, np.array(self.boxes_1, dtype=np.float32)))
 

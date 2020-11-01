@@ -12,11 +12,11 @@ class Boxes(object):
             boxes: a list of boxes defined by [[y_min, y_max, x_min, x_max]. ...]
         """
         if boxes != []:
-            self.boxes = np.array(boxes, dtype=np.float32)
-            if self.boxes.ndim == 1:
-                self.boxes = np.expand_dims(self.boxes, axis=0)
+            self.array = np.array(boxes, dtype=np.float32)
+            if self.array.ndim == 1:
+                self.array = np.expand_dims(self.array, axis=0)
         else:
-            self.boxes = None
+            self.array = None
 
     def areas(self):
         """Return the areas of the boxes.
@@ -24,8 +24,8 @@ class Boxes(object):
         Returns:
             areas of the boxes.
         """
-        heights = self.boxes[:, 1] - self.boxes[:, 0]
-        widths = self.boxes[:, 3] - self.boxes[:, 2]
+        heights = self.array[:, 1] - self.array[:, 0]
+        widths = self.array[:, 3] - self.array[:, 2]
         areas = np.multiply(heights, widths)
 
         return areas
@@ -39,12 +39,12 @@ class Boxes(object):
         Returns:
             intersection_areas.
         """
-        max_y_min = np.maximum(self.boxes[:, 0], boxes.boxes[:, 0].transpose())
-        min_y_max = np.minimum(self.boxes[:, 1], boxes.boxes[:, 1].transpose())
+        max_y_min = np.maximum(self.array[:, 0], boxes.array[:, 0].transpose())
+        min_y_max = np.minimum(self.array[:, 1], boxes.array[:, 1].transpose())
         heights = np.maximum(0, min_y_max - max_y_min)
 
-        max_x_min = np.maximum(self.boxes[:, 2], boxes.boxes[:, 2].transpose())
-        min_x_max = np.minimum(self.boxes[:, 3], boxes.boxes[:, 3].transpose())
+        max_x_min = np.maximum(self.array[:, 2], boxes.array[:, 2].transpose())
+        min_x_max = np.minimum(self.array[:, 3], boxes.array[:, 3].transpose())
         widths = np.maximum(0, min_x_max - max_x_min)
 
         areas = np.multiply(widths, heights)
