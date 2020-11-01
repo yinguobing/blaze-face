@@ -65,10 +65,11 @@ class Boxes(object):
         """
         intersecion = self.intersection(boxes)
         areas_self = self.areas()
-        areas_input = boxes.areas().transpose()
-        union = np.add(areas_self, areas_input) - intersecion
+        areas_input = boxes.areas()
+        union = np.expand_dims(areas_self, axis=1) + \
+            np.expand_dims(areas_input, axis=0) - intersecion
 
-        iou = np.divide(intersecion, union)
+        iou = intersecion / union
 
         return iou
 

@@ -53,7 +53,7 @@ class TestBoxesFunctions(unittest.TestCase):
         b = anchors.Boxes([2, 8, 2, 8])
         areas = a.iou(b)
         self.assertTrue(
-            np.allclose(areas, np.array([[1/(4+36-1), 1/36]], dtype=np.float32)))
+            np.allclose(areas, np.array([[1/(4+36-1)], [1/36]], dtype=np.float32)))
 
     def test_anchors_init(self):
         a = anchors.Anchors([0.5, 0.1], [1], (16, 16), (128, 128))
