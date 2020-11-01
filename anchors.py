@@ -39,13 +39,16 @@ class Boxes(object):
         Returns:
             intersection_areas.
         """
-        max_y_min = np.maximum(self.array[:, 0], boxes.array[:, 0].transpose())
-        min_y_max = np.minimum(self.array[:, 1], boxes.array[:, 1].transpose())
-        heights = np.maximum(0, min_y_max - max_y_min)
+        [y_min1, y_max1, x_min1, x_max1] = np.split(self.array, 4, axis=1)
+        [y_min2, y_max2, x_min2, x_max2] = np.split(boxes.array, 4, axis=1)
 
-        max_x_min = np.maximum(self.array[:, 2], boxes.array[:, 2].transpose())
-        min_x_max = np.minimum(self.array[:, 3], boxes.array[:, 3].transpose())
-        widths = np.maximum(0, min_x_max - max_x_min)
+        max_ymin = np.maximum(y_min1, y_min2.transpose())
+        min_ymax = np.minimum(y_max1, y_max2.transpose())
+        heights = np.maximum(0, min_ymax - max_ymin)
+
+        max_xmin = np.maximum(x_min1, x_min2.transpose())
+        min_xmax = np.minimum(x_max1, x_max2.transpose())
+        widths = np.maximum(0, min_xmax - max_xmin)
 
         areas = np.multiply(widths, heights)
 
@@ -100,5 +103,4 @@ class Anchors(Boxes):
             for hx, hy in zip(half_sizes_x, half_sizes_y):
                 anchor_boxes.append(np.stack([y_centers - hy, y_centers + hy,
                                               x_centers - hx, x_centers + hx], axis=1))
-        self.array = np.array(
-            anchor_boxes, dtype=np.float32).reshape((-1, 4))
+        self.array = np.array(anchor_boxes, dtype=np.float32).reshape((-1, 4))

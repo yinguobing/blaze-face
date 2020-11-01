@@ -34,6 +34,13 @@ class TestBoxesFunctions(unittest.TestCase):
         self.assertTrue(
             np.allclose(areas, np.array([[1, 0]], dtype=np.float32)))
 
+    def test_multiple_intersection(self):
+        a = anchors.Boxes([[2, 4, 2, 4], [5, 7, 5, 7], [8, 9, 8, 9]])
+        b = anchors.Boxes(self.boxes_1)
+        areas = a.intersection(b)
+        self.assertTrue(
+            np.allclose(areas, np.array([[1, 0], [0, 1], [0, 0]], dtype=np.float32)))
+
     def test_iou_no_intersection(self):
         a = anchors.Boxes(self.boxes_1)
         b = anchors.Boxes(self.boxes_2)
