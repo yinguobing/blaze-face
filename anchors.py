@@ -144,7 +144,7 @@ class Anchors(Boxes):
         training_target = np.zeros_like(self.array)
 
         # If no boxes are matched.
-        if matched_indices == []:
+        if matched_indices.size == 0:
             return training_target
 
         # Then compute the offset of the anchor boxes.
