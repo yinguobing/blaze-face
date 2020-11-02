@@ -63,6 +63,20 @@ class TestBoxesFunctions(unittest.TestCase):
         a = anchors.Anchors(s, r, featmap_size, (128, 128))
         self.assertTupleEqual(a.array.shape, (m*n*len(s)*len(r), 4))
 
+    def test_matching(self):
+        s = [0.5, 0.1]
+        r = [1]
+        m, n = featmap_size = (16, 16)
+        a = anchors.Anchors(s, r, featmap_size, (128, 128))
+        gt = anchors.Boxes([[32, 64, 32, 64], [54, 66, 50, 60]])
+        t = a.match(gt, matched_threshold=0)
+
+        v = Visualizer((128, 128))
+        v.draw_boxes(a.array, 'b')
+        v.draw_boxes(gt.array, 'r')
+        v.show()
+        self.assertTrue(np.allclose(t, [68, 374]))
+
 
 if __name__ == '__main__':
     unittest.main()
