@@ -138,7 +138,7 @@ class Anchors(Boxes):
 
         return matched_indices
 
-    def get_anchor_transformation(self, matched_indices):
+    def get_transformation(self, boxes, matched_indices):
         """Get the transformation from anchors to boxes."""
 
         # Set up the training target.
@@ -152,8 +152,8 @@ class Anchors(Boxes):
         matched_anchors = self.array[matched_indices]
         matched_boxes = boxes.array[matched_indices]
 
-        ya, xa, ha, wa = self._get_xyhw(matched_anchors)
-        y, x, h, w = self._get_xyhw(matched_boxes)
+        xa, ya, wa, ha = self._get_center_width_height(matched_anchors)
+        x, y, w, h = self._get_center_width_height(matched_boxes)
 
         ha += EPSILON
         wa += EPSILON
@@ -169,11 +169,13 @@ class Anchors(Boxes):
 
         return training_target
 
-    def _get_xyhw(self, boxes):
+    @classmethod
+    def _get_center_width_height(self, boxes):
         """Return the center points' x, y, boxes height and width."""
-        y = (boxes[:, 0] + boxes[:, 1]) / 2
-        x = (boxes[:, 2] + boxes[:, 3]) / 2
-        h = boxes[:, 1] - boxes[:, 0]
-        w = boxes[:, 3] - boxes[:, 2]
+        y_min, y_max, x_min, x_max = np.split(boxes, 4, axis=1)
+        y = (y_min + y_max) / 2
+        x = (x_min + x_max) / 2
+        h = y_max - y_min
+        w = x_max - x_min
 
-        return np.hstack([y, x, h, w])
+        return np.hstack([x, y, w, h])

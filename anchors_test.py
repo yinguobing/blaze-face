@@ -70,12 +70,24 @@ class TestBoxesFunctions(unittest.TestCase):
         a = anchors.Anchors(s, r, featmap_size, (128, 128))
         gt = anchors.Boxes([[32, 64, 32, 64], [54, 66, 50, 60]])
         t = a.match(gt, matched_threshold=0)
-
-        v = Visualizer((128, 128))
-        v.draw_boxes(a.array, 'b')
-        v.draw_boxes(gt.array, 'r')
-        v.show()
         self.assertTrue(np.allclose(t, [68, 374]))
+
+    def test_get_center_width_height(self):
+        b = anchors.Boxes([[32, 60, 32, 60],
+                           [26, 38, 90, 102],
+                           [80, 88, 55, 68],
+                           [70, 122, 70, 122]])
+        r = anchors.Anchors._get_center_width_height(b.array)
+        print(r)
+        v = Visualizer((128, 128))
+        v.draw_boxes(b.array, 'b')
+        v.show()
+
+        self.assertTrue(
+            np.allclose(r, np.array([[46, 46, 28, 28],
+                                     [96, 32, 12, 12],
+                                     [61.5, 84, 13, 8],
+                                     [96, 96, 52, 52]], dtype=np.float32)))
 
 
 if __name__ == '__main__':
