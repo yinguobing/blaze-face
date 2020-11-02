@@ -76,7 +76,6 @@ class Boxes(object):
 
 class Anchors(Boxes):
     """Anchor boxes used in object detection."""
-    EPSILON = 1e-8
 
     def __init__(self, sizes, ratios, feature_map_size, image_size):
         """ Construct anchor boxes for object detection.
@@ -133,8 +132,8 @@ class Anchors(Boxes):
         # Then filter out those whose IoU is less than the threshold.
         ious_max = np.amax(ious, axis=0)
         matched_indices = np.where(
-            ious_max > matched_threshold, indices_max, 0)
-        matched_indices = matched_indices[matched_indices != 0]
+            ious_max > matched_threshold, indices_max, -1)
+        matched_indices = matched_indices[matched_indices != -1]
 
         return matched_indices
 
@@ -152,9 +151,12 @@ class Anchors(Boxes):
         matched_anchors = self.array[matched_indices]
         matched_boxes = boxes.array[matched_indices]
 
-        xa, ya, wa, ha = self._get_center_width_height(matched_anchors)
-        x, y, w, h = self._get_center_width_height(matched_boxes)
+        xa, ya, wa, ha = np.split(
+            self._get_center_width_height(matched_anchors), 4, axis=1)
+        x, y, w, h = np.split(
+            self._get_center_width_height(matched_boxes), 4, axis=1)
 
+        EPSILON = 1e-8
         ha += EPSILON
         wa += EPSILON
         h += EPSILON
