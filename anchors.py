@@ -76,6 +76,7 @@ class Boxes(object):
 
 class Anchors(Boxes):
     """Anchor boxes used in object detection."""
+    EPSILON = 1e-8
 
     def __init__(self, sizes, ratios, feature_map_size, image_size):
         """ Construct anchor boxes for object detection.
@@ -103,5 +104,76 @@ class Anchors(Boxes):
 
             for hx, hy in zip(half_sizes_x, half_sizes_y):
                 anchor_boxes.append(np.stack([y_centers - hy, y_centers + hy,
-                                              x_centers - hx, x_centers + hx], axis=1))
+                                              x_centers - hx, x_centers + hx],
+                                             axis=1))
         self.array = np.array(anchor_boxes, dtype=np.float32).reshape((-1, 4))
+
+    def match(self, boxes, matched_threshold):
+        """Match the anchors with ground truth boxes and return the indices.
+
+        Args:
+            boxes: ground truth boxes.
+            matched_threshold: value larger than threshold will be considered positive.
+
+        Returns:
+            matched anchor boxes' indices.
+        """
+        # Get the IoUs to match from.
+        ious = self.iou(boxes)
+
+        # TODO: If we are lucky, there will always be enough anchor boxes for
+        # ground truth boxes. What happens if there are not? *
+
+        # First find all the matched boxes.
+        indices_max = np.argmax(ious, axis=0)
+
+        # TODO: What if more than one ground truth boxes are assigned to the
+        # same anchor?
+
+        # Then filter out those whose IoU is less than the threshold.
+        ious_max = np.amax(ious, axis=0)
+        matched_indices = np.where(
+            ious_max > matched_threshold, indices_max, 0)
+        matched_indices = matched_indices[matched_indices != 0]
+
+        return matched_indices
+
+    def get_anchor_transformation(self, matched_indices):
+        """Get the transformation from anchors to boxes."""
+
+        # Set up the training target.
+        training_target = np.zeros_like(self.array)
+
+        # If no boxes are matched.
+        if matched_indices == []:
+            return training_target
+
+        # Then compute the offset of the anchor boxes.
+        matched_anchors = self.array[matched_indices]
+        matched_boxes = boxes.array[matched_indices]
+
+        ya, xa, ha, wa = self._get_xyhw(matched_anchors)
+        y, x, h, w = self._get_xyhw(matched_boxes)
+
+        ha += EPSILON
+        wa += EPSILON
+        h += EPSILON
+        w += EPSILON
+
+        ty = (y - ya) / ha * 10
+        tx = (x - xa) / wa * 10
+        th = np.log(h / ha) * 5
+        tw = np.log(w / wa) * 5
+
+        training_target[matched_indices] = np.hstack([tx, ty, tw, th])
+
+        return training_target
+
+    def _get_xyhw(self, boxes):
+        """Return the center points' x, y, boxes height and width."""
+        y = (boxes[:, 0] + boxes[:, 1]) / 2
+        x = (boxes[:, 2] + boxes[:, 3]) / 2
+        h = boxes[:, 1] - boxes[:, 0]
+        w = boxes[:, 3] - boxes[:, 2]
+
+        return np.hstack([y, x, h, w])
