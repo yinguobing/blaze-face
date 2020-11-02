@@ -78,16 +78,24 @@ class TestBoxesFunctions(unittest.TestCase):
                            [80, 88, 55, 68],
                            [70, 122, 70, 122]])
         r = anchors.Anchors._get_center_width_height(b.array)
-        print(r)
-        v = Visualizer((128, 128))
-        v.draw_boxes(b.array, 'b')
-        v.show()
-
         self.assertTrue(
             np.allclose(r, np.array([[46, 46, 28, 28],
                                      [96, 32, 12, 12],
                                      [61.5, 84, 13, 8],
                                      [96, 96, 52, 52]], dtype=np.float32)))
+
+    def test_anchor_transformation(self):
+        a = anchors.Anchors([0.3], [1], (2, 2), (128, 128))
+        gt = anchors.Boxes([[32, 60, 32, 60],
+                            [26, 38, 90, 102],
+                            [80, 88, 55, 68],
+                            [70, 122, 70, 122]])
+        i = a.match(gt, 0)
+        t = a.get_transformation(gt, i)
+        self.assertTrue(np.allclose(t, np.array([[3.645833,   3.645833, -1.579265, -1.579265],
+                                                 [0.,  0., -5.8157535, -5.815754],
+                                                 [0.,  0., 0., 0.],
+                                                 [0.,  0.,  1.5159321, 1.5159321]])))
 
 
 if __name__ == '__main__':
