@@ -100,7 +100,7 @@ class Anchors(Boxes):
         anchor_boxes = []
         for r in ratios:
             half_sizes_x = [s * image_size[0] * np.sqrt(r) / 2 for s in sizes]
-            half_sizes_y = [s * image_size[1] * np.sqrt(r) / 2 for s in sizes]
+            half_sizes_y = [s * image_size[1] / np.sqrt(r) / 2 for s in sizes]
 
             for hx, hy in zip(half_sizes_x, half_sizes_y):
                 anchor_boxes.append(np.stack([y_centers - hy, y_centers + hy,
