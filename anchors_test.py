@@ -72,6 +72,15 @@ class TestBoxesFunctions(unittest.TestCase):
         t = a.match(gt, matched_threshold=0)
         self.assertTrue(np.allclose(t, [68, 374]))
 
+    def test_matching_failed(self):
+        s = [0.1]
+        r = [1]
+        m, n = featmap_size = (2, 2)
+        a = anchors.Anchors(s, r, featmap_size, (128, 128))
+        gt = anchors.Boxes([0, 5, 0, 5])
+        t = a.match(gt, matched_threshold=0)
+        self.assertTrue(np.allclose(t, []))
+
     def test_get_center_width_height(self):
         b = anchors.Boxes([[32, 60, 32, 60],
                            [26, 38, 90, 102],
