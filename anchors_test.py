@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 import anchors
+from visualization import Visualizer
 
 
 class TestBoxesFunctions(unittest.TestCase):
@@ -56,8 +57,11 @@ class TestBoxesFunctions(unittest.TestCase):
             np.allclose(areas, np.array([[1/(4+36-1)], [1/36]], dtype=np.float32)))
 
     def test_anchors_init(self):
-        a = anchors.Anchors([0.5, 0.1], [1], (16, 16), (128, 128))
-        self.assertTupleEqual(a.array.shape, (512, 4))
+        s = [0.3, 0.2]
+        r = [1, 2]
+        m, n = featmap_size = (2, 2)
+        a = anchors.Anchors(s, r, featmap_size, (128, 128))
+        self.assertTupleEqual(a.array.shape, (m*n*len(s)*len(r), 4))
 
 
 if __name__ == '__main__':
