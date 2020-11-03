@@ -137,8 +137,8 @@ class Anchors(Boxes):
 
         return matched_indices
 
-    def get_transformation(self, boxes, matched_indices):
-        """Get the transformation from anchors to boxes."""
+    def encode(self, boxes, matched_indices):
+        """Encode the matched boxes to training target."""
 
         # Set up the training target.
         training_target = np.zeros_like(self.array)

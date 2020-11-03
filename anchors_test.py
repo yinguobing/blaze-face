@@ -100,11 +100,12 @@ class TestBoxesFunctions(unittest.TestCase):
                             [80, 88, 55, 68],
                             [70, 122, 70, 122]])
         i = a.match(gt, 0)
-        t = a.get_transformation(gt, i)
-        self.assertTrue(np.allclose(t, np.array([[3.645833,   3.645833, -1.579265, -1.579265],
-                                                 [0.,  0., -5.8157535, -5.815754],
-                                                 [0.,  0., 0., 0.],
-                                                 [0.,  0.,  1.5159321, 1.5159321]])))
+        t = a.encode(gt, i)
+        self.assertTrue(
+            np.allclose(t, np.array([[3.645833, 3.645833, -1.579265, -1.579265],
+                                     [0.,  0., -5.8157535, -5.815754],
+                                     [0.,  0., 0., 0.],
+                                     [0.,  0.,  1.5159321, 1.5159321]])))
 
 
 if __name__ == '__main__':
