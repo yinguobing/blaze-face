@@ -107,6 +107,27 @@ class TestBoxesFunctions(unittest.TestCase):
                                      [0.,  0., 0., 0.],
                                      [0.,  0.,  1.5159321, 1.5159321]])))
 
+    def test_decode(self):
+        a = anchors.Anchors([0.3], [1], (2, 2), (128, 128))
+        gt = anchors.Boxes([[32, 60, 32, 60],
+                            [26, 38, 90, 102],
+                            [80, 88, 55, 68],
+                            [70, 122, 70, 122]])
+        i = a.match(gt, 0)
+        t = a.encode(gt, i)
+        print(t)
+        b = a.decode(t)
+        print(b.array)
+
+        v = Visualizer((128, 128))
+        v.draw_boxes(a.array, 'b')
+        v.draw_boxes(gt.array, 'r')
+        v.draw_boxes(b.array, 'g')
+        v.show()
+
+        self.assertTrue(np.allclose(b.array, np.vstack(
+            [gt.array[:2], a.array[2], gt.array[3]])))
+
 
 if __name__ == '__main__':
     unittest.main()

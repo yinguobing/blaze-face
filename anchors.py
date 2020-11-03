@@ -9,9 +9,12 @@ class Boxes(object):
         """Create a bunch of boxes.
 
         Args:
-            boxes: a list of boxes defined by [[y_min, y_max, x_min, x_max]. ...]
+            boxes: a list of boxes defined by [[y_min, y_max, x_min, x_max]. ...],
+                or a numpy array.
         """
-        if boxes != []:
+        if isinstance(boxes, np.ndarray):
+            self.array = boxes
+        elif boxes != []:
             self.array = np.array(boxes, dtype=np.float32)
             if self.array.ndim == 1:
                 self.array = np.expand_dims(self.array, axis=0)
@@ -170,6 +173,36 @@ class Anchors(Boxes):
         training_target[matched_indices] = np.hstack([tx, ty, tw, th])
 
         return training_target
+
+    def decode(self, prediction):
+        """Convert the prediction back to boxes.
+
+        Args:
+            prediction: network output of the regression result.
+
+        Returns:
+            decoded boxes.
+        """
+        xa, ya, wa, ha = np.split(
+            self._get_center_width_height(self.array), 4, axis=1)
+        tx, ty, tw, th = np.split(prediction, 4, axis=1)
+
+        ty /= 10
+        tx /= 10
+        th /= 5
+        tw /= 5
+
+        h = np.exp(th) * ha
+        w = np.exp(tw) * wa
+        y = ty * ha + ya
+        x = tx * wa + xa
+
+        y_min = y - h / 2
+        y_max = y + h / 2
+        x_min = x - w / 2
+        x_max = x + w / 2
+
+        return Boxes(np.hstack([y_min, y_max, x_min, x_max]))
 
     @classmethod
     def _get_center_width_height(self, boxes):
