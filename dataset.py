@@ -105,3 +105,16 @@ class WiderFace(object):
         else:
             raise ValueError(
                 'Mode {} not supported, check again.'.format(mode))
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index == len(self.dataset):
+            raise StopIteration
+        sample = self.dataset[self.index]
+        self.index += 1
+        return sample
