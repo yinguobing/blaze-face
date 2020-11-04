@@ -19,7 +19,7 @@ class DetectionSample(object):
             boxes: numpy array of bounding boxes [[x, y, w, h], ...]
 
         """
-        self.image_file = image
+        self.image_file = image_file
         self.boxes = boxes
 
     def read_image(self, format="BGR"):
@@ -78,15 +78,21 @@ class WiderFace(object):
                 while(True):
                     # Find out which image file to be processed.
                     line = fid.readline()
-                    line = line.rstrip(' ')
+                    if line == "":
+                        break
+                    line = line.rstrip('\n').rstrip()
                     assert line.endswith(".jpg"), "Failed to read next label."
                     img_file = os.path.join(dataset_path, img_dir, line)
 
                     # Read the bounding boxes.
-                    n_boxes = int(fid.readline())
-                    lines = [fid.readline().rstrip(' ')
+                    n_boxes = int(fid.readline().rstrip('\n').rstrip())
+                    if n_boxes == 0:
+                        fid.readline()
+                        continue
+                    lines = [fid.readline().rstrip('\n').rstrip().split(' ')
                              for _ in range(n_boxes)]
-                    boxes = np.array(lines, dtype=np.int)[:, :4]
+
+                    boxes = np.array(lines, dtype=np.int)
 
                     # Accumulate the results.
                     samples.append(DetectionSample(img_file, boxes))
@@ -105,6 +111,9 @@ class WiderFace(object):
         else:
             raise ValueError(
                 'Mode {} not supported, check again.'.format(mode))
+
+        # Set index for iterator.
+        self.index = 0
 
     def __len__(self):
         return len(self.dataset)
