@@ -92,7 +92,7 @@ class WiderFace(object):
                     lines = [fid.readline().rstrip('\n').rstrip().split(' ')
                              for _ in range(n_boxes)]
 
-                    boxes = np.array(lines, dtype=np.int)
+                    boxes = np.array(lines, dtype=np.int)[:, :4]
 
                     # Accumulate the results.
                     samples.append(DetectionSample(img_file, boxes))
