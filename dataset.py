@@ -169,3 +169,44 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
         image_norm = normalize(image)
 
         yield image_norm, labels
+
+
+def build_dataset_from_wider(data_dir,
+                             name,
+                             training=True,
+                             batch_size=None,
+                             shuffle=True,
+                             prefetch=None):
+    """Generate WIDER FACE dataset from image and label files.
+
+    Args:
+        data_dir: the directory of the dataset files.
+        name: dataset name.
+        training: True if dataset is for training.
+        batch_size: batch size.
+        shuffle: True if data should be shuffled.
+        prefetch: Set to True to prefetch data.
+
+    Returns:
+        a tf.data.dataset.
+    """
+    mode = "train" if training else "val"
+    dataset = tf.data.Dataset.from_generator(
+        generate_WIDER,
+        output_types=(tf.float32, tf.float32),
+        output_shapes=((128, 128, 3), (None, 4)),
+        args=[data_dir, mode])
+    print("Dataset built from generator: {}".format(name))
+
+    # Shuffle the data.
+    if shuffle:
+        dataset = dataset.shuffle(1024)
+
+    # Make data batch.
+    dataset = dataset.batch(batch_size)
+
+    # Prefetch the data.
+    if prefetch is not None:
+        dataset = dataset.prefetch(prefetch)
+
+    return dataset
