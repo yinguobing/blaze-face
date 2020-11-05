@@ -140,7 +140,7 @@ def generate_WIDER(data_dir, mode="train",):
     Yields:
         image and label pair.
     """
-    wider = WiderFace(data_dir, mode=mode)
+    wider = WiderFace(data_dir.decode('utf-8'), mode=mode.decode('utf-8'))
     for sample in wider:
         image = sample.read_image(format="RGB")
         boxes_gt = sample.boxes
@@ -158,3 +158,4 @@ def generate_WIDER(data_dir, mode="train",):
         image_norm = normalize(image)
 
         yield image_norm, boxes_gt
+
