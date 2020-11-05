@@ -16,4 +16,4 @@ def normalize(image):
     img_std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
     # Normalization
-    return ((inputs / 255.0) - img_mean)/img_std
+    return ((image / 255.0) - img_mean)/img_std
