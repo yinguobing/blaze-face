@@ -130,7 +130,7 @@ class WiderFace(object):
         return sample
 
 
-def generate_WIDER(data_dir, mode="train",):
+def generate_WIDER(data_dir, mode="train", matched_threshold=0):
     """A generator for building tf.data.dataset.
 
     Args:
@@ -159,7 +159,7 @@ def generate_WIDER(data_dir, mode="train",):
         anchors.stack(a_8)
 
         # Match the ground truth boxes to the anchors.
-        matched_indices = anchors.match(boxes_gt)
+        matched_indices = anchors.match(boxes_gt, matched_threshold)
 
         # Encode the matching result into logits labels.
         labels = anchors.encode(boxes_gt, matched_indices)
