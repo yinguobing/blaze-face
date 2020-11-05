@@ -76,6 +76,14 @@ class Boxes(object):
 
         return iou
 
+    def stack(self, boxes):
+        """Stack two set of boxes together.
+
+        Args:
+            boxes: boxes to be stacked.
+        """
+        self.array = np.vstack([self.array, boxes.array])
+
 
 class Anchors(Boxes):
     """Anchor boxes used in object detection."""
