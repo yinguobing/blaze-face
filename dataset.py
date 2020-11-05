@@ -157,4 +157,4 @@ def generate_WIDER(data_dir, mode="train",):
         image = cv2.resize(image, (128, 128))
         image_norm = normalize(image)
 
-        yield image, boxes_gt
+        yield image_norm, boxes_gt
