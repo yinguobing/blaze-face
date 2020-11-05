@@ -7,6 +7,7 @@ import numpy as np
 import tensorflow as tf
 
 from anchors import Anchors, Boxes
+from preprocessing import normalize
 
 
 class DetectionSample(object):
@@ -92,7 +93,7 @@ class WiderFace(object):
                     lines = [fid.readline().rstrip('\n').rstrip().split(' ')
                              for _ in range(n_boxes)]
 
-                    boxes = np.array(lines, dtype=np.int)[:, :4]
+                    boxes = np.array(lines, dtype=np.float32)[:, :4]
 
                     # Accumulate the results.
                     samples.append(DetectionSample(img_file, boxes))
@@ -127,3 +128,33 @@ class WiderFace(object):
         sample = self.dataset[self.index]
         self.index += 1
         return sample
+
+
+def generate_WIDER(data_dir, mode="train",):
+    """A generator for building tf.data.dataset.
+
+    Args:
+        data_dir: the path to the WIDER FACE files.
+        mode: train/val/test
+
+    Yields:
+        image and label pair.
+    """
+    wider = WiderFace(data_dir, mode=mode)
+    for sample in wider:
+        image = sample.read_image(format="RGB")
+        boxes_gt = sample.boxes
+
+        # Transform the bbox size.
+        x, y, w, h = np.split(boxes_gt, 4, axis=1)
+        boxes_gt = np.hstack([y, y+h, x, x+w])
+
+        height, width, _ = image.shape
+        boxes_gt[:, :2] *= (128. / height)
+        boxes_gt[:, 2:] *= (128. / width)
+
+        # Process the image.
+        image = cv2.resize(image, (128, 128))
+        image_norm = normalize(image)
+
+        yield image, boxes_gt
