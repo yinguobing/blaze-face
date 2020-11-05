@@ -23,6 +23,10 @@ class TestBoxesFunctions(unittest.TestCase):
         self.assertTrue(
             np.allclose(b, np.array(self.boxes_1, dtype=np.float32)))
 
+    def test_boxes_number(self):
+        b = anchors.Boxes(self.boxes_1).array
+        self.assertEqual(len(b), 2)
+
     def test_boxes_areas(self):
         areas = anchors.Boxes(self.boxes_1).areas()
         self.assertTrue(
@@ -70,7 +74,7 @@ class TestBoxesFunctions(unittest.TestCase):
         a = anchors.Anchors(s, r, featmap_size, (128, 128))
         gt = anchors.Boxes([[32, 64, 32, 64], [54, 66, 50, 60]])
         t = a.match(gt, matched_threshold=0)
-        self.assertTrue(np.allclose(t, [68, 374]))
+        self.assertTrue(np.allclose(t, [[68, 0], [374, 1]]))
 
     def test_matching_failed(self):
         s = [0.1]
@@ -79,7 +83,7 @@ class TestBoxesFunctions(unittest.TestCase):
         a = anchors.Anchors(s, r, featmap_size, (128, 128))
         gt = anchors.Boxes([0, 5, 0, 5])
         t = a.match(gt, matched_threshold=0)
-        self.assertTrue(np.allclose(t, []))
+        self.assertEqual(t.size, 0)
 
     def test_get_center_width_height(self):
         b = anchors.Boxes([[32, 60, 32, 60],
@@ -93,11 +97,24 @@ class TestBoxesFunctions(unittest.TestCase):
                                      [61.5, 84, 13, 8],
                                      [96, 96, 52, 52]], dtype=np.float32)))
 
-    def test_anchor_transformation(self):
+    def test_encode_equal_number(self):
         a = anchors.Anchors([0.3], [1], (2, 2), (128, 128))
         gt = anchors.Boxes([[32, 60, 32, 60],
                             [26, 38, 90, 102],
                             [80, 88, 55, 68],
+                            [70, 122, 70, 122]])
+        i = a.match(gt, 0)
+        t = a.encode(gt, i)
+        self.assertTrue(
+            np.allclose(t, np.array([[3.645833, 3.645833, -1.579265, -1.579265],
+                                     [0.,  0., -5.8157535, -5.815754],
+                                     [0.,  0., 0., 0.],
+                                     [0.,  0.,  1.5159321, 1.5159321]])))
+
+    def test_encode_less_boxes(self):
+        a = anchors.Anchors([0.3], [1], (2, 2), (128, 128))
+        gt = anchors.Boxes([[32, 60, 32, 60],
+                            [26, 38, 90, 102],
                             [70, 122, 70, 122]])
         i = a.match(gt, 0)
         t = a.encode(gt, i)
@@ -115,10 +132,7 @@ class TestBoxesFunctions(unittest.TestCase):
                             [70, 122, 70, 122]])
         i = a.match(gt, 0)
         t = a.encode(gt, i)
-        print(t)
         b = a.decode(t)
-        print(b.array)
-
         v = Visualizer((128, 128))
         v.draw_boxes(a.array, 'b')
         v.draw_boxes(gt.array, 'r')
