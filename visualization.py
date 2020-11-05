@@ -24,6 +24,9 @@ class Visualizer(object):
                                      edgecolor=edgecolor, facecolor='none')
             self.ax.add_patch(rect)
 
+    def set_background(self, image):
+        self.background = image
+
     def show(self):
         plt.imshow(self.background)
         plt.show()
