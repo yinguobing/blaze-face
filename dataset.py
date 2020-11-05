@@ -143,19 +143,29 @@ def generate_WIDER(data_dir, mode="train",):
     wider = WiderFace(data_dir.decode('utf-8'), mode=mode.decode('utf-8'))
     for sample in wider:
         image = sample.read_image(format="RGB")
-        boxes_gt = sample.boxes
+        boxes_wider = sample.boxes
 
         # Transform the bbox size.
-        x, y, w, h = np.split(boxes_gt, 4, axis=1)
-        boxes_gt = np.hstack([y, y+h, x, x+w])
-
+        x, y, w, h = np.split(boxes_wider, 4, axis=1)
+        boxes_wider = np.hstack([y, y+h, x, x+w])
         height, width, _ = image.shape
-        boxes_gt[:, :2] *= (128. / height)
-        boxes_gt[:, 2:] *= (128. / width)
+        boxes_wider[:, :2] *= (128. / height)
+        boxes_wider[:, 2:] *= (128. / width)
+        boxes_gt = Boxes(boxes_wider)
+
+        # Generate anchor boxes.
+        anchors = Anchors((0.5, 0.75), [1], (16, 16), (128, 128))
+        a_8 = Anchors((0.4, 0.5, 0.6, 0.7, 0.8, 0.9), [1], (8, 8), (128, 128))
+        anchors.stack(a_8)
+
+        # Match the ground truth boxes to the anchors.
+        matched_indices = anchors.match(boxes_gt)
+
+        # Encode the matching result into logits labels.
+        labels = anchors.encode(boxes_gt, matched_indices)
 
         # Process the image.
         image = cv2.resize(image, (128, 128))
         image_norm = normalize(image)
 
-        yield image_norm, boxes_gt
-
+        yield image_norm, labels
