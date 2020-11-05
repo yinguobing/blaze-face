@@ -21,6 +21,9 @@ class Boxes(object):
         else:
             self.array = None
 
+    def __len__(self):
+        return self.array.shape[0]
+
     def areas(self):
         """Return the areas of the boxes.
 
@@ -135,16 +138,21 @@ class Anchors(Boxes):
         # ground truth boxes. What happens if there are not? *
 
         # First find all the matched boxes.
-        indices_max = np.argmax(ious, axis=0)
+        max_anchor_indices = np.argmax(ious, axis=0)
 
         # TODO: What if more than one ground truth boxes are assigned to the
         # same anchor?
 
         # Then filter out those whose IoU is less than the threshold.
         ious_max = np.amax(ious, axis=0)
-        matched_indices = np.where(
-            ious_max > matched_threshold, indices_max, -1)
-        matched_indices = matched_indices[matched_indices != -1]
+        matched_anchor_indices = np.where(
+            ious_max > matched_threshold, max_anchor_indices, -1)
+
+        # Combine the anchor indices and box indices.
+        matched_indices = np.vstack(
+            [matched_anchor_indices, np.arange(len(boxes))])
+        matched_indices = matched_indices[:,
+                                          matched_anchor_indices != -1].transpose()
 
         return matched_indices
 
@@ -159,8 +167,8 @@ class Anchors(Boxes):
             return training_target
 
         # Then compute the offset of the anchor boxes.
-        matched_anchors = self.array[matched_indices]
-        matched_boxes = boxes.array[matched_indices]
+        matched_anchors = self.array[matched_indices[:, 0]]
+        matched_boxes = boxes.array[matched_indices[:, 1]]
 
         xa, ya, wa, ha = np.split(
             self._get_center_width_height(matched_anchors), 4, axis=1)
@@ -178,7 +186,7 @@ class Anchors(Boxes):
         th = np.log(h / ha) * 5
         tw = np.log(w / wa) * 5
 
-        training_target[matched_indices] = np.hstack([tx, ty, tw, th])
+        training_target[matched_indices[:, 0]] = np.hstack([tx, ty, tw, th])
 
         return training_target
 
