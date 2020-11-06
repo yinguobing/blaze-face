@@ -59,13 +59,13 @@ def blaze_net(input_shape):
     # Get the classification and box from 16x16 feature map.
     classes_16 = keras.layers.Conv2D(2, (1, 1))(x_16)
     classes_16 = keras.layers.Flatten()(classes_16)
-    boxes_16 = keras.layers.Conv2D(4*2, (1, 1))(x_16)
+    boxes_16 = keras.layers.Conv2D(5*2, (1, 1))(x_16)
     boxes_16 = keras.layers.Flatten()(boxes_16)
 
     # Get the classification and box from 8x8 feature map.
     classes_8 = keras.layers.Conv2D(6, (1, 1))(x_8)
     classes_8 = keras.layers.Flatten()(classes_8)
-    boxes_8 = keras.layers.Conv2D(4*6, (1, 1))(x_8)
+    boxes_8 = keras.layers.Conv2D(5*6, (1, 1))(x_8)
     boxes_8 = keras.layers.Flatten()(boxes_8)
 
     # Assemble the results.
