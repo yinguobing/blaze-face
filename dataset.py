@@ -165,8 +165,9 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
         boxes_logtis = anchors.encode(boxes_gt, matched_indices)
 
         # Attach the probability to the boxes logits.
-        probability = np.zeros(len(anchors))
-        probability[matched_indices] = 1
+        probability = np.zeros((len(anchors), 1))
+        if matched_indices.size != 0:
+            probability[matched_indices[:, 0]] = 1
 
         labels = np.hstack([probability, boxes_logtis])
 
@@ -200,7 +201,7 @@ def build_dataset_from_wider(data_dir,
     dataset = tf.data.Dataset.from_generator(
         generate_WIDER,
         output_types=(tf.float32, tf.float32),
-        output_shapes=((128, 128, 3), (None, 4)),
+        output_shapes=((128, 128, 3), (None, 5)),
         args=[data_dir, mode])
     print("Dataset built from generator: {}".format(name))
 
@@ -216,3 +217,11 @@ def build_dataset_from_wider(data_dir,
         dataset = dataset.prefetch(prefetch)
 
     return dataset
+
+
+if __name__ == "__main__":
+    d = build_dataset_from_wider(
+        "/home/robin/data/face/wider", "wider_train", batch_size=1)
+
+    for i, r in d:
+        print(r)
