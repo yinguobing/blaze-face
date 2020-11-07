@@ -161,8 +161,11 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
         # Match the ground truth boxes to the anchors.
         matched_indices = anchors.match(boxes_gt, matched_threshold)
 
-        # Encode the matching result into logits labels.
-        labels = anchors.encode(boxes_gt, matched_indices)
+        # Encode the matching result into labels.
+        boxes_label = anchors.encode(boxes_gt, matched_indices)
+        classifications = np.zeros((len(anchors), 1), dtype=np.float32)
+        classifications[matched_indices[:, 0]] = 1
+        labels = np.hstack([boxes_label, classifications])
 
         # Process the image.
         image = cv2.resize(image, (128, 128))
