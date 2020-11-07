@@ -197,7 +197,7 @@ def build_dataset_from_wider(data_dir,
     dataset = tf.data.Dataset.from_generator(
         generate_WIDER,
         output_types=(tf.float32, tf.float32),
-        output_shapes=((128, 128, 3), (None, 5)),
+        output_shapes=((128, 128, 3), (896, 5)),
         args=[data_dir, mode])
     print("Dataset built from generator: {}".format(name))
 
