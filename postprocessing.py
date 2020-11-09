@@ -8,7 +8,7 @@ from anchors import Anchors
 def decode(prediction, threshold):
     # Seprate classifications and boxes transformations.
     regression = prediction[:, :4]
-    classification = tf.sigmoid(prediction[:, 4])
+    classification = tf.sigmoid(prediction[:, 5])
 
     # Decode the detection result.
     anchors = Anchors((0.15, 0.25), [1], (16, 16), (128, 128))
