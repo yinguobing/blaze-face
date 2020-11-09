@@ -8,7 +8,7 @@ from tensorflow import keras
 from callbacks import EpochBasedLearningRateSchedule
 from network import blaze_net
 from dataset import build_dataset_from_wider
-from losses import RetinaNetLoss
+from losses import BlazeLoss
 
 parser = ArgumentParser()
 parser.add_argument("--epochs", default=60, type=int,
@@ -44,12 +44,6 @@ if __name__ == "__main__":
     # All sets. Now it's time to build the model. This model is defined in the
     # `network` module with TensorFlow's functional API.
     model = blaze_net(input_shape=(128, 128, 3))
-
-    # Compile the model and print the model summary.
-    model.compile(optimizer=keras.optimizers.Adam(0.0001),
-                  loss=RetinaNetLoss(),
-                  metrics=[keras.metrics.MeanSquaredError()])
-    # model.summary()
 
     # Model built. Restore the latest model if checkpoints are available.
     if not os.path.exists(checkpoint_dir):
@@ -88,6 +82,11 @@ if __name__ == "__main__":
     dataset_val = build_dataset_from_wider(
         wider_dir, 'wider-val', False, 16, False, tf.data.experimental.AUTOTUNE).take(300)
 
+    # Compile the model and print the model summary.
+    model.compile(optimizer=keras.optimizers.SGD(0.01),
+                  loss=BlazeLoss())
+    model.summary()
+
     # Finally, it's time to train the model.
 
     # Set hyper parameters for training.
@@ -118,7 +117,7 @@ if __name__ == "__main__":
     callback_lr = EpochBasedLearningRateSchedule(schedule)
 
     # List all the callbacks.
-    callbacks = [callback_checkpoint, callback_tensorboard, callback_lr]
+    callbacks = [callback_checkpoint, callback_tensorboard]
 
     # Construct training datasets.
     dataset_train = build_dataset_from_wider(
