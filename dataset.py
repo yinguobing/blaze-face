@@ -154,7 +154,7 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
         boxes_gt = Boxes(boxes_wider)
 
         # Generate anchor boxes.
-        anchors = Anchors((0.5, 0.75), [1], (16, 16), (128, 128))
+        anchors = Anchors((0.15, 0.25), [1], (16, 16), (128, 128))
         a_8 = Anchors((0.4, 0.5, 0.6, 0.7, 0.8, 0.9), [1], (8, 8), (128, 128))
         anchors.stack(a_8)
 
@@ -163,8 +163,11 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
 
         # Encode the matching result into labels.
         boxes_label = anchors.encode(boxes_gt, matched_indices)
+
+        # Encoding the classifications. 1: positive; -1: negative; -2: ignored
         classifications = np.zeros((len(anchors), 1), dtype=np.float32)
         classifications[matched_indices[:, 0]] = 1
+
         labels = np.hstack([boxes_label, classifications])
 
         # Process the image.
