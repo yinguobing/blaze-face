@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-from anchors import Anchors, Boxes
+from anchors import Anchors, Boxes, build_anchors
 from preprocessing import normalize
 
 
@@ -154,9 +154,7 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
         boxes_gt = Boxes(boxes_wider)
 
         # Generate anchor boxes.
-        anchors = Anchors((0.15, 0.25), [1], (16, 16), (128, 128))
-        a_8 = Anchors((0.4, 0.5, 0.6, 0.7, 0.8, 0.9), [1], (8, 8), (128, 128))
-        anchors.stack(a_8)
+        anchors = build_anchors()
 
         # Match the ground truth boxes to the anchors.
         matched_indices = anchors.match(boxes_gt, matched_threshold)

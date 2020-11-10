@@ -230,3 +230,13 @@ class Anchors(Boxes):
         w = x_max - x_min
 
         return np.hstack([x, y, w, h])
+
+
+def build_anchors():
+    """Build the anchor boxes for BlazeFace."""
+    anchors = Anchors((0.5, 0.75), [1], (16, 16), (128, 128))
+    a_8 = Anchors((0.35, 0.45, 0.55, 0.65, 0.75, 0.85),
+                  [1], (8, 8), (128, 128))
+    anchors.stack(a_8)
+
+    return anchors

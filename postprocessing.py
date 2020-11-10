@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-from anchors import Anchors
+from anchors import Anchors, build_anchors
 
 
 def decode(prediction, threshold):
@@ -11,9 +11,7 @@ def decode(prediction, threshold):
     scores = tf.sigmoid(prediction[:, 5])
 
     # Decode the detection result.
-    anchors = Anchors((0.15, 0.25), [1], (16, 16), (128, 128))
-    a_8 = Anchors((0.4, 0.5, 0.6, 0.7, 0.8, 0.9), [1], (8, 8), (128, 128))
-    anchors.stack(a_8)
+    anchors = build_anchors()
     boxes = anchors.decode(regression).array
 
     # Select the best match with NMS.
