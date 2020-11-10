@@ -56,7 +56,7 @@ if __name__ == "__main__":
         prediction = model.predict(tf.expand_dims(img_input, 0))[0]
 
         # Parse the prediction to get face locations.
-        faces = decode(prediction, 0.8)
+        faces = decode(prediction, 0.2)
 
         # Draw the face boxes.
         draw_face_boxes(frame, faces)
