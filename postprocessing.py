@@ -8,7 +8,7 @@ from anchors import Anchors
 def decode(prediction, threshold):
     # Seprate classifications and boxes transformations.
     regression = prediction[:, :4]
-    classification = tf.sigmoid(prediction[:, 5])
+    scores = tf.sigmoid(prediction[:, 5])
 
     # Decode the detection result.
     anchors = Anchors((0.15, 0.25), [1], (16, 16), (128, 128))
@@ -16,12 +16,14 @@ def decode(prediction, threshold):
     anchors.stack(a_8)
     boxes = anchors.decode(regression).array
 
-    print(np.amax(classification))
+    # Select the best match with NMS.
+    y1, y2, x1, x2 = tf.split(boxes, 4, axis=1)
+    boxes = tf.concat([y1, x1, y2, x2], axis=1)
+    selected_indices = tf.image.non_max_suppression(
+        boxes, scores, 10, threshold)
+    selected_boxes = tf.gather(boxes, selected_indices)
 
-    # Filter out the invalid results from the classifications.
-    valid_boxes = boxes[classification > threshold]
-
-    return valid_boxes
+    return selected_boxes
 
 
 def draw_face_boxes(image, boxes):
