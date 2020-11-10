@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # Construct a dataset for evaluation. Wider face do not provide boxes for
     # test set, use validation data instead.
     dataset_test = build_dataset_from_wider(
-        wider_dir, 'wider-test', False, 16, False, tf.data.experimental.AUTOTUNE)
+        wider_dir, 'wider-test', False, args.batch_size, False, tf.data.experimental.AUTOTUNE)
 
     # If only evaluation is required.
     if args.eval_only:
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # Construct dataset for validation. The loss value from this dataset will be
     # used to decide which checkpoint should be preserved.
     dataset_val = build_dataset_from_wider(
-        wider_dir, 'wider-val', False, 16, False, tf.data.experimental.AUTOTUNE).take(300)
+        wider_dir, 'wider-val', False, args.batch_size, False, tf.data.experimental.AUTOTUNE).take(300)
 
     # Compile the model and print the model summary.
     model.compile(optimizer=keras.optimizers.SGD(0.01),
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     # Construct training datasets.
     dataset_train = build_dataset_from_wider(
-        wider_dir, 'wider-train', True, 16, True, tf.data.experimental.AUTOTUNE)
+        wider_dir, 'wider-train', True, batch_size, True, tf.data.experimental.AUTOTUNE)
 
     # Start training loop.
     model.fit(dataset_train, validation_data=dataset_val,
