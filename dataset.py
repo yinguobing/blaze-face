@@ -146,8 +146,13 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
     anchors = build_anchors()
 
     for sample in wider:
-        image = sample.read_image(format="RGB")
+        # BlazeFace only cares large faces which means too many small faces in
+        # image is not a good training sample.
         boxes_wider = sample.boxes
+        if boxes_wider.shape[0] > 6:
+            continue
+            
+        image = sample.read_image(format="RGB")
 
         # Transform the bbox size.
         x, y, w, h = np.split(boxes_wider, 4, axis=1)
