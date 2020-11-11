@@ -15,10 +15,8 @@ def decode(prediction, threshold):
     boxes = anchors.decode(regression).array
 
     # Select the best match with NMS.
-    y1, y2, x1, x2 = tf.split(boxes, 4, axis=1)
-    boxes_trans = tf.concat([y1, x1, y2, x2], axis=1)
     selected_indices = tf.image.non_max_suppression(
-        boxes_trans, scores, 10, score_threshold=threshold)
+        boxes, scores, 10, score_threshold=threshold)
     selected_boxes = tf.gather(boxes, selected_indices)
 
     return selected_boxes
@@ -29,7 +27,7 @@ def draw_face_boxes(image, boxes):
 
     # Draw the boxes.
     for box in boxes:
-        y_min, y_max, x_min, x_max = box / 128
+        y_min, x_min, y_max, x_max = box / 128
         y_min, y_max = y_min * height, y_max * height
         x_min, x_max = x_min * width,  x_max * width
         cv2.rectangle(image, (int(x_min), int(y_min)),
