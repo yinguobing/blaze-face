@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 import tensorflow as tf
 from tensorflow import keras
 
+from callbacks import LogImages
 from network import blaze_net
 from dataset import build_dataset_from_wider
 from losses import BlazeLoss
@@ -107,9 +108,10 @@ if __name__ == "__main__":
                                                        histogram_freq=1024,
                                                        write_graph=True,
                                                        update_freq='epoch')
+    callback_image = LogImages(log_dir, "/home/robin/Pictures/family.jpg")
 
     # List all the callbacks.
-    callbacks = [callback_checkpoint, callback_tensorboard]
+    callbacks = [callback_checkpoint, callback_tensorboard, callback_image]
 
     # Construct training datasets.
     dataset_train = build_dataset_from_wider(

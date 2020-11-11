@@ -63,5 +63,5 @@ if __name__ == "__main__":
 
         # Show the result in windows.
         cv2.imshow('image', frame)
-        if cv2.waitKey(27) == 27:
+        if cv2.waitKey(1) == 27:
             break
