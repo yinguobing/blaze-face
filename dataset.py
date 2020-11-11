@@ -141,20 +141,23 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
         image and label pair.
     """
     wider = WiderFace(data_dir.decode('utf-8'), mode=mode.decode('utf-8'))
+
+    # Generate anchor boxes.
+    anchors = build_anchors()
+
     for sample in wider:
         image = sample.read_image(format="RGB")
         boxes_wider = sample.boxes
 
         # Transform the bbox size.
         x, y, w, h = np.split(boxes_wider, 4, axis=1)
-        boxes_wider = np.hstack([y, y+h, x, x+w])
+        boxes_wider = np.hstack([y, x, y+h, x+w])
         height, width, _ = image.shape
-        boxes_wider[:, :2] *= (128. / height)
-        boxes_wider[:, 2:] *= (128. / width)
+        boxes_wider[:, 0] *= (128. / height)
+        boxes_wider[:, 2] *= (128. / height)
+        boxes_wider[:, 1] *= (128. / width)
+        boxes_wider[:, 3] *= (128. / width)
         boxes_gt = Boxes(boxes_wider)
-
-        # Generate anchor boxes.
-        anchors = build_anchors()
 
         # Match the ground truth boxes to the anchors.
         matched_indices = anchors.match(boxes_gt, matched_threshold)
@@ -220,5 +223,16 @@ if __name__ == "__main__":
     d = build_dataset_from_wider(
         "/home/robin/data/face/wider", "wider_train", batch_size=1)
 
-    for i, r in d:
-        print(r)
+    from visualization import Visualizer
+
+    anchors = build_anchors()
+    for image, logtis in d:
+        t = logtis[0, :, :4].numpy()
+        c = logtis[0, :, 4].numpy()
+        boxes = anchors.decode(t).array
+        boxes = boxes[c == 1]
+
+        v = Visualizer((128, 128))
+        v.set_background(image[0])
+        v.draw_boxes(boxes)
+        v.show()

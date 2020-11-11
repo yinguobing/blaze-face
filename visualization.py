@@ -11,15 +11,15 @@ class Visualizer(object):
         self.fig, self.ax = plt.subplots(1)
 
         # Create the background.
-        self.background = np.ones(canvas_size+(3,))*256
+        self.background = np.ones(canvas_size+(3,))*255
 
     def draw_boxes(self, boxes, edgecolor='b'):
         # Draw the boxes.
         for box in boxes:
-            w = box[3] - box[2]
-            h = box[1] - box[0]
+            w = box[3] - box[1]
+            h = box[2] - box[0]
             y = box[0]
-            x = box[2]
+            x = box[1]
             rect = patches.Rectangle((x, y), w, h, linewidth=1,
                                      edgecolor=edgecolor, facecolor='none')
             self.ax.add_patch(rect)

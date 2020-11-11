@@ -9,7 +9,7 @@ class Boxes(object):
         """Create a bunch of boxes.
 
         Args:
-            boxes: a list of boxes defined by [[y_min, y_max, x_min, x_max]. ...],
+            boxes: a list of boxes defined by [[y_min, x_min, y_max, x_max]. ...],
                 or a numpy array.
         """
         if isinstance(boxes, np.ndarray):
@@ -30,8 +30,8 @@ class Boxes(object):
         Returns:
             areas of the boxes.
         """
-        heights = self.array[:, 1] - self.array[:, 0]
-        widths = self.array[:, 3] - self.array[:, 2]
+        heights = self.array[:, 2] - self.array[:, 0]
+        widths = self.array[:, 3] - self.array[:, 1]
         areas = np.multiply(heights, widths)
 
         return areas
@@ -45,8 +45,8 @@ class Boxes(object):
         Returns:
             intersection_areas.
         """
-        [y_min1, y_max1, x_min1, x_max1] = np.split(self.array, 4, axis=1)
-        [y_min2, y_max2, x_min2, x_max2] = np.split(boxes.array, 4, axis=1)
+        [y_min1, x_min1, y_max1, x_max1] = np.split(self.array, 4, axis=1)
+        [y_min2, x_min2, y_max2, x_max2] = np.split(boxes.array, 4, axis=1)
 
         max_ymin = np.maximum(y_min1, y_min2.transpose())
         min_ymax = np.minimum(y_max1, y_max2.transpose())
@@ -74,7 +74,6 @@ class Boxes(object):
         areas_input = boxes.areas()
         union = np.expand_dims(areas_self, axis=1) + \
             np.expand_dims(areas_input, axis=0) - intersecion
-
         iou = intersecion / union
 
         return iou
@@ -102,22 +101,26 @@ class Anchors(Boxes):
         """
         # Get all the anchors center points.
         nx, ny = feature_map_size
-        half_width = image_size[0]/nx/2
-        half_height = image_size[1]/ny/2
-        x_g, y_g = np.meshgrid(np.linspace(0, image_size[0], nx, endpoint=False),
-                               np.linspace(0, image_size[1], ny, endpoint=False))
-        x_centers = x_g.flatten() + half_width
-        y_centers = y_g.flatten() + half_height
+        img_width, img_height = image_size
+
+        shift_x = img_width / nx / 2
+        shift_y = img_height / ny / 2
+        centers_x, centers_y = np.meshgrid(
+            np.linspace(0, img_width, nx, endpoint=False),
+            np.linspace(0, img_height, ny, endpoint=False))
+
+        centers_x = centers_x.flatten() + shift_x
+        centers_y = centers_y.flatten() + shift_y
 
         # Get the anchors' size and stack them all together.
         anchor_boxes = []
         for r in ratios:
-            half_sizes_x = [s * image_size[0] * np.sqrt(r) / 2 for s in sizes]
-            half_sizes_y = [s * image_size[1] / np.sqrt(r) / 2 for s in sizes]
+            anchor_sizes_x = [img_width * np.sqrt(r) * s / 2 for s in sizes]
+            anchor_sizes_y = [img_height / np.sqrt(r) * s / 2 for s in sizes]
 
-            for hx, hy in zip(half_sizes_x, half_sizes_y):
-                anchor_boxes.append(np.stack([y_centers - hy, y_centers + hy,
-                                              x_centers - hx, x_centers + hx],
+            for ax, ay in zip(anchor_sizes_x, anchor_sizes_y):
+                anchor_boxes.append(np.stack([centers_y - ay, centers_x - ax,
+                                              centers_y + ay, centers_x + ax],
                                              axis=1))
         self.array = np.array(anchor_boxes, dtype=np.float32).reshape((-1, 4))
 
@@ -135,9 +138,9 @@ class Anchors(Boxes):
         ious = self.iou(boxes)
 
         # TODO: If we are lucky, there will always be enough anchor boxes for
-        # ground truth boxes. What happens if there are not? *
+        # ground truth boxes. What happens if there are not?
 
-        # First find all the matched boxes.
+        # First find all the anchor boxes with max IoU.
         max_anchor_indices = np.argmax(ious, axis=0)
 
         # TODO: What if more than one ground truth boxes are assigned to the
@@ -151,8 +154,8 @@ class Anchors(Boxes):
         # Combine the anchor indices and box indices.
         matched_indices = np.vstack(
             [matched_anchor_indices, np.arange(len(boxes))])
-        matched_indices = matched_indices[:,
-                                          matched_anchor_indices != -1].transpose()
+        matched_indices = matched_indices[
+            :, matched_anchor_indices != -1].transpose()
 
         return matched_indices
 
@@ -218,12 +221,12 @@ class Anchors(Boxes):
         x_min = x - w / 2
         x_max = x + w / 2
 
-        return Boxes(np.hstack([y_min, y_max, x_min, x_max]))
+        return Boxes(np.hstack([y_min, x_min, y_max, x_max]))
 
     @classmethod
     def _get_center_width_height(self, boxes):
         """Return the center points' x, y, boxes height and width."""
-        y_min, y_max, x_min, x_max = np.split(boxes, 4, axis=1)
+        y_min, x_min, y_max, x_max = np.split(boxes, 4, axis=1)
         y = (y_min + y_max) / 2
         x = (x_min + x_max) / 2
         h = y_max - y_min
