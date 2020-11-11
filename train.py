@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 import tensorflow as tf
 from tensorflow import keras
 
-from callbacks import EpochBasedLearningRateSchedule
 from network import blaze_net
 from dataset import build_dataset_from_wider
 from losses import BlazeLoss
@@ -93,11 +92,6 @@ if __name__ == "__main__":
     epochs = args.epochs
     batch_size = args.batch_size
 
-    # Schedule the learning rate with (epoch to start, learning rate) tuples
-    schedule = [(1, 0.001),
-                (30, 0.0001),
-                (50, 0.00001)]
-
     # All done. The following code will setup and start the trainign.
 
     # Save a checkpoint. This could be used to resume training.
@@ -113,8 +107,6 @@ if __name__ == "__main__":
                                                        histogram_freq=1024,
                                                        write_graph=True,
                                                        update_freq='epoch')
-    # Learning rate decay.
-    callback_lr = EpochBasedLearningRateSchedule(schedule)
 
     # List all the callbacks.
     callbacks = [callback_checkpoint, callback_tensorboard]
