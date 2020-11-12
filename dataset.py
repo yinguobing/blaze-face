@@ -130,7 +130,7 @@ class WiderFace(object):
         return sample
 
 
-def generate_WIDER(data_dir, mode="train", matched_threshold=0):
+def generate_WIDER(data_dir, mode="train", matched_threshold=0.5):
     """A generator for building tf.data.dataset.
 
     Args:
@@ -151,7 +151,7 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
         boxes_wider = sample.boxes
         if boxes_wider.shape[0] > 6:
             continue
-            
+
         image = sample.read_image(format="RGB")
 
         # Transform the bbox size.
@@ -166,6 +166,8 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0):
 
         # Match the ground truth boxes to the anchors.
         matched_indices = anchors.match(boxes_gt, matched_threshold)
+        if matched_indices.size == 0:
+            continue
 
         # Encode the matching result into labels.
         boxes_label = anchors.encode(boxes_gt, matched_indices)
