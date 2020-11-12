@@ -173,8 +173,8 @@ class BlazeLoss(keras.losses.Loss):
     def __init__(self):
         super().__init__()
         self._cls_loss_fn = RetinanetClassLoss(0.25, 1.5, 2)
-        self._box_loss_fn = RetinanetBoxLoss(1.0)
-        self._box_loss_weight = 1
+        self._box_loss_fn = RetinanetBoxLoss(0.1)
+        self._box_loss_weight = 50
 
     def call(self, labels, outputs):
 
