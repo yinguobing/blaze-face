@@ -237,8 +237,8 @@ class Anchors(Boxes):
 
 def build_anchors():
     """Build the anchor boxes for BlazeFace."""
-    anchors = Anchors((0.5, 0.75), [1], (16, 16), (128, 128))
-    a_8 = Anchors((0.35, 0.45, 0.55, 0.65, 0.75, 0.85),
+    anchors = Anchors((0.2, 0.3), [1], (16, 16), (128, 128))
+    a_8 = Anchors((0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
                   [1], (8, 8), (128, 128))
     anchors.stack(a_8)
 
