@@ -16,7 +16,7 @@ def decode(prediction, threshold):
 
     # Select the best match with NMS.
     selected_indices = tf.image.non_max_suppression(
-        boxes, scores, 10, score_threshold=threshold)
+        boxes, scores, 100, score_threshold=threshold)
     selected_boxes = tf.gather(boxes, selected_indices)
 
     return selected_boxes

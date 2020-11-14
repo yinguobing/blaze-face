@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 from callbacks import LogImages
-from network import blaze_net
+from network import build_model
 from dataset import build_dataset_from_wider
 from losses import BlazeLoss
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # All sets. Now it's time to build the model. This model is defined in the
     # `network` module with TensorFlow's functional API.
-    model = blaze_net(input_shape=(128, 128, 3))
+    model = build_model()
 
     # Model built. Restore the latest model if checkpoints are available.
     if not os.path.exists(checkpoint_dir):
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     # Compile the model and print the model summary.
     model.compile(optimizer=keras.optimizers.SGD(0.01),
                   loss=BlazeLoss())
-    model.summary()
+    # model.summary()
 
     # Finally, it's time to train the model.
 
