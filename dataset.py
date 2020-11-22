@@ -166,8 +166,8 @@ def generate_WIDER(data_dir, mode="train", matched_threshold=0.5):
 
         # Match the ground truth boxes to the anchors.
         matched_indices = anchors.match(boxes_gt, matched_threshold)
-        if matched_indices.size == 0:
-            continue
+        # if matched_indices.size == 0:
+        #     continue
 
         # Encode the matching result into labels.
         boxes_label = anchors.encode(boxes_gt, matched_indices)
@@ -208,7 +208,7 @@ def build_dataset_from_wider(data_dir,
     dataset = tf.data.Dataset.from_generator(
         generate_WIDER,
         output_types=(tf.float32, tf.float32),
-        output_shapes=((128, 128, 3), (896, 5)),
+        output_shapes=((128, 128, 3), (2880, 5)),
         args=[data_dir, mode])
     print("Dataset built from generator: {}".format(name))
 
