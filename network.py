@@ -1,4 +1,5 @@
 """Providing network definition for BlazeFace"""
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
@@ -18,6 +19,25 @@ def blaze_stem(filters):
         for layer in stem_layers:
             inputs = layer(inputs)
 
+        return inputs
+
+    return forward
+
+
+def build_head(output_filters, bias_init):
+    kernel_init = tf.initializers.RandomNormal(0.0, 0.01)
+    head_layers = []
+    for _ in range(4):
+        head_layers.append(keras.layers.Conv2D(256, 3, padding="same",
+                                               kernel_initializer=kernel_init))
+        head_layers.append(keras.layers.Activation("relu"))
+    head_layers.append(keras.layers.Conv2D(output_filters, 3, 1, padding="same",
+                                           kernel_initializer=kernel_init,
+                                           bias_initializer=bias_init))
+
+    def forward(inputs):
+        for layer in head_layers:
+            inputs = layer(inputs)
         return inputs
 
     return forward
@@ -56,20 +76,26 @@ def blaze_net(input_shape):
         x = layer(x)
     x_8 = x
 
+    # Build class head and box head.
+    class_initializer = tf.constant_initializer(-np.log((1 - 0.01) / 0.01))
+    class_head = build_head(9 * 2, class_initializer)
+    box_head = build_head(9 * 4, "zeros")
+
     # Get the classification and box from 16x16 feature map.
-    classes_16 = keras.layers.Conv2D(2*2, (1, 1))(x_16)
+    classes_16 = class_head(x_16)
     classes_16 = keras.layers.Reshape((-1, 2))(classes_16)
-    boxes_16 = keras.layers.Conv2D(4*2, (1, 1))(x_16)
+    boxes_16 = box_head(x_16)
     boxes_16 = keras.layers.Reshape((-1, 4))(boxes_16)
 
     # Get the classification and box from 8x8 feature map.
-    classes_8 = keras.layers.Conv2D(2*6, (1, 1))(x_8)
+    classes_8 = class_head(x_8)
     classes_8 = keras.layers.Reshape((-1, 2))(classes_8)
-    boxes_8 = keras.layers.Conv2D(4*6, (1, 1))(x_8)
+    boxes_8 = box_head(x_8)
     boxes_8 = keras.layers.Reshape((-1, 4))(boxes_8)
 
     # Assemble the results.
-    classifications = keras.layers.Concatenate(axis=-2)([classes_16, classes_8])
+    classifications = keras.layers.Concatenate(
+        axis=-2)([classes_16, classes_8])
     boxes = keras.layers.Concatenate(axis=-2)([boxes_16, boxes_8])
     outputs = keras.layers.Concatenate(axis=-1)([boxes, classifications])
 
