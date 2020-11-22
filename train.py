@@ -83,7 +83,7 @@ if __name__ == "__main__":
         wider_dir, 'wider-val', False, args.batch_size, False, tf.data.experimental.AUTOTUNE).take(300)
 
     # Compile the model and print the model summary.
-    model.compile(optimizer=keras.optimizers.SGD(0.01),
+    model.compile(optimizer=keras.optimizers.SGD(0.0001),
                   loss=BlazeLoss())
     model.summary()
 
